@@ -8,10 +8,11 @@
 import SwiftUI
 
 struct ContentView: View {
-    
+
     @State private var gameType: GameType = .undertermined
     @State private var yourName = ""
     @State private var opponentName = ""
+    @State private var botDifficulty: BotDifficulty = .medium
     @FocusState private var focus: Bool
     @State private var startGame = false
     
@@ -22,7 +23,7 @@ struct ContentView: View {
                 Text("Select Game Type").tag(GameType.undertermined)
                 Text("Two Sharing Device").tag(GameType.single)
                 Text("Challenge a bot").tag(GameType.bot)
-                Text("Challange a friend").tag(GameType.peer)
+                Text("Challenge a friend").tag(GameType.peer)
             }
             .padding()
             .background(
@@ -41,8 +42,19 @@ struct ContentView: View {
                         TextField("Opponent Name", text: $opponentName)
                     }
                 case .bot:
-                    VStack {
+                    VStack(spacing: 16) {
                         TextField("Your Name", text: $yourName)
+
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Bot Difficulty")
+                                .font(.headline)
+                            Picker("Difficulty", selection: $botDifficulty) {
+                                ForEach(BotDifficulty.allCases, id: \.self) { difficulty in
+                                    Text(difficulty.rawValue).tag(difficulty)
+                                }
+                            }
+                            .pickerStyle(.segmented)
+                        }
                     }
                 case .peer:
                     EmptyView()
@@ -63,16 +75,20 @@ struct ContentView: View {
                 .buttonStyle(.borderedProminent)
                 .disabled(
                     gameType == .undertermined ||
-                    gameType == .bot && yourName.isEmpty ||
-                    gameType == .single &&
-                    (yourName.isEmpty || opponentName.isEmpty)
+                    (gameType == .bot && yourName.isEmpty) ||
+                    (gameType == .single && (yourName.isEmpty || opponentName.isEmpty))
                 )
             }
         }
         .padding()
         .navigationTitle("Tic Tac Toe")
         .fullScreenCover(isPresented: $startGame, content: {
-            GameView()
+            GameView(
+                gameType: gameType,
+                playerName: yourName.isEmpty ? "Player" : yourName,
+                opponentName: gameType == .bot ? "Bot" : (opponentName.isEmpty ? "Opponent" : opponentName),
+                botDifficulty: botDifficulty
+            )
         })
         .inNavigationStack()
         

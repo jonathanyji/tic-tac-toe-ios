@@ -14,8 +14,18 @@ class GameState: ObservableObject {
     @Published var circleScore = 0
     @Published var showAlert = false
     @Published var alertMessage = "Draw"
-    
-    init() {
+    @Published var isThinking = false
+
+    let gameType: GameType
+    let playerName: String
+    let opponentName: String
+    let botDifficulty: BotDifficulty
+
+    init(gameType: GameType = .single, playerName: String = "Cross", opponentName: String = "Circle", botDifficulty: BotDifficulty = .medium) {
+        self.gameType = gameType
+        self.playerName = playerName
+        self.opponentName = opponentName
+        self.botDifficulty = botDifficulty
         resetBoard()
     }
     
@@ -33,8 +43,8 @@ class GameState: ObservableObject {
             } else {
                 circleScore += 1
             }
-            let winner = turn == Tile.Cross ? "Cross" : "Circle"
-            alertMessage = winner + " Win!"
+            let winner = turn == Tile.Cross ? playerName : opponentName
+            alertMessage = winner + " Wins!"
             showAlert = true
         } else {
             turn = turn == Tile.Cross ? Tile.Circle : Tile.Cross
@@ -47,7 +57,6 @@ class GameState: ObservableObject {
     }
     
     func checkForDraw() -> Bool {
-    
         for row in board {
             for cell in row {
                 if cell.tile == Tile.Empty {
@@ -55,13 +64,12 @@ class GameState: ObservableObject {
                 }
             }
         }
-        
         return true
     }
     
     func checkForVictory() -> Bool {
         
-        // Verticle victory
+        // Vertical victory
         if isTurnTile(0, 0) && isTurnTile(1, 0) && isTurnTile(2, 0){
             return true
         }
@@ -100,7 +108,7 @@ class GameState: ObservableObject {
     
     func resetBoard() {
         var newBoard = [[Cell]]()
-        
+
         for _ in 0...2 {
             var row = [Cell]()
             for _ in 0...2 {
@@ -110,11 +118,16 @@ class GameState: ObservableObject {
             }
             newBoard.append(row)
         }
-        
+
         board = newBoard
+        turn = .Cross
     }
     
     func turnText() -> String {
-        return turn == Tile.Cross ? "Turn X" : "Turn O"
+        if isThinking {
+            return "Bot is thinking..."
+        }
+        let currentPlayer = turn == Tile.Cross ? playerName : opponentName
+        return "\(currentPlayer)'s Turn"
     }
 }
