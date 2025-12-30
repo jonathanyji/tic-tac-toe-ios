@@ -30,13 +30,13 @@ class GameState: ObservableObject {
     }
     
     func placeTile(_ row: Int, _ column: Int){
-        
+
         if (board[row][column].tile != Tile.Empty){
             return
         }
-        
+
         board[row][column].tile = turn == Tile.Cross ? Tile.Cross : Tile.Circle
-        
+
         if (checkForVictory()) {
             if (turn == Tile.Cross){
                 crossScore += 1
@@ -49,7 +49,7 @@ class GameState: ObservableObject {
         } else {
             turn = turn == Tile.Cross ? Tile.Circle : Tile.Cross
         }
-        
+
         if (checkForDraw()) {
             alertMessage = "Draw"
             showAlert = true
